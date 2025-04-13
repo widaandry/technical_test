@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Auth;
 use GuzzleHttp\Client;
 use App\Models\FavoriteMovie;
 
@@ -29,7 +28,7 @@ class MovieController extends Controller
         try {
             $response = $client->request('GET', 'https://www.omdbapi.com/', [
                 'query' => [
-                    'apikey' => env('OMDB_API_KEY'),  // Use environment variable for API key
+                    'apikey' => 'db516bd1',  // Use environment variable for API key
                     's' => $movieName, // Movie title to search
                     'page' => $page, // Page number for pagination
                     'y' => $year, //Year release
@@ -67,7 +66,7 @@ class MovieController extends Controller
 
         $response = $client->request('GET', 'https://www.omdbapi.com/', [
             'query' => [
-                'apikey' => env('OMDB_API_KEY'),
+                'apikey' => 'db516bd1',
                 'i' => $imdbID,  // IMDb ID for the specific movie
             ],
         ]);
@@ -89,6 +88,10 @@ class MovieController extends Controller
     public function toggleFavorite(Request $request)
     {
         $imdbID = $request->imdbID;
+        $title = $request->title;
+        $type = $request->type;
+        $year = $request->year;
+        $image_url = $request->image_url;
 
         if (empty($imdbID)) {
             return response()->json(['error' => 'imdbID is required'], 400);
@@ -110,6 +113,10 @@ class MovieController extends Controller
             $favorite = new FavoriteMovie();
             $favorite->user_id = $user->id;
             $favorite->imdbID = $imdbID;
+            $favorite->title = $title;
+            $favorite->type = $type;
+            $favorite->year = $year;
+            $favorite->image_url = $image_url;
             $favorite->save();
 
             return response()->json([

@@ -7,10 +7,15 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import VueAxios from 'vue-axios'
 import VueRouter from 'vue-router'
-import App from './index'
+import App from './app.vue'
 import store from './store'
 import router from './router'
-import VueLazyload from 'vue-lazyload';
+import VueLazyload from 'vue-lazyload'
+import Toasted from 'vue-toasted'
+import Swal from 'sweetalert2'
+import VueI18n from 'vue-i18n'
+import en from './lang/en'
+import id from './lang/id'
 
 window.Vue = Vue
 
@@ -20,7 +25,23 @@ Vue.use(VueLazyload, {
 });
 Vue.use(VueAxios, axios)
 Vue.use(VueRouter)
-Vue.use(Vuex);
+Vue.use(Vuex)
+Vue.use(VueI18n)
+
+Vue.prototype.$swal = Swal;
+Vue.use(Toasted, {
+  duration: 3000,
+  position: 'top-right',
+  theme: 'bubble'
+});
+
+const i18n = new VueI18n({
+  locale: 'en', // default locale
+  messages: {
+    en,
+    id
+  }
+})
 
 axios.defaults.baseURL = `${process.env.MIX_APP_URL}/api/v1`
 axios.interceptors.request.use((config) => {
@@ -58,6 +79,7 @@ Vue.mixin({
 
 const app = new Vue({
   el: '#app',
+  i18n,
   store,  
   router,
   render: (h) => h(App),

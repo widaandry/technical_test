@@ -60,10 +60,11 @@ const actions = {
         throw error; 
     }
   },
-  async register({ commit }, { name, email, password, password_confirmation }) {
+  async register({ commit }, { name, username, email, password, password_confirmation }) {
     try {
         const response = await axios.post('/auth/register', {
             name,
+            username,
             email,
             password,
             password_confirmation,
@@ -74,9 +75,9 @@ const actions = {
         throw error; 
     }
   },
-  async login({ commit }, { email, password }) {
+  async login({ commit }, { login, password }) {
     try {
-        const response = await axios.post('/auth/login', { email, password });
+        const response = await axios.post('/auth/login', { login, password });
         const { userData, token } = response.data;
         localStorage.setItem('auth_token', token);
         localStorage.setItem('user', JSON.stringify(userData));

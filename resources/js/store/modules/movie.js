@@ -32,8 +32,15 @@ const mutations = {
     ];
     state.movieList = uniqueMovies;
   },
+  movieListByFavorite(state, movie) {
+    state.movieList = movie;
+  },
   resetMovieList(state) {
     state.movieList = [];
+  },
+  resetFavMovieList() {
+    localStorage.removeItem('FavoriteMovies');
+    state.favoriteMovies = [];
   },
   setPrevSearch(state, search) {
     state.prevSearchMovie = search; 
@@ -44,7 +51,7 @@ const mutations = {
   setFavoriteMovies(state, favorites) {
     state.favoriteMovies = favorites;
     try {
-      localStorage.setItem('FavoriteMovies', JSON.stringify(favorites));  // Ensure the user is stringified
+      localStorage.setItem('FavoriteMovies', JSON.stringify(favorites)); 
     } catch (e) {
       console.error('Error saving user to localStorage:', e);
     }
@@ -143,13 +150,19 @@ const actions = {
         commit('setLoading', false); 
       });
   },
-  async toggleFavorite({ commit }, imdbID) {
+  async toggleFavorite({ commit }, { imdbID, title, type, year, image_url }) {
     try {
-      const response = await axios.post('/movie/toggleFavorite', { imdbID });
+      const response = await axios.post('/movie/toggleFavorite', { 
+        imdbID, 
+        title, 
+        type, 
+        year, 
+        image_url
+      });
       
       commit('toggleFavorite', imdbID);
       const { isFavorite } = response.data;
-      return { isFavorite: isFavorite }; 
+      return isFavorite; 
     } catch (error) {
       console.error("Error adding movie to favorites:", error);
       return { isFavorite: false };
@@ -166,6 +179,28 @@ const actions = {
         commit('setLoading', false); 
       });
   },
+  async getFavoriteMovie({ commit }, imdbID) {
+    try {
+      commit('setLoading', true);
+      const response = await axios.get('/movie/movieDetail', {
+        params: {
+          imdbID,
+        }
+      });
+
+      const movie = response.data;
+
+      if (movie.Response === 'True') {
+        commit('setPrevSearch', movie.Title);  
+        commit('movieListByFavorite', movie);  
+      }
+
+    } catch (error) {
+      console.error('Error fetching movie detail:', error);
+    } finally {
+      commit('setLoading', false);
+    }
+  },
 };
 
 export default {
@@ -175,3 +210,4 @@ export default {
   actions,
   getters,
 };
+  
